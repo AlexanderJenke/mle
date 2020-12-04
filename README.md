@@ -17,4 +17,4 @@ This python package provides code I use over and over again for machine learning
 
 ## Usage
 Import the package and use the code snippets.
-For the full documentation refer to the [docs](https://github.com/AlexanderJenke/mle/blob/master/docs/).
+For the full documentation refer to the [docs](https://github.com/AlexanderJenke/mle/blob/master/docs/mle/).
