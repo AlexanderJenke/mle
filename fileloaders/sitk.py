@@ -4,7 +4,6 @@ from torch import Tensor
 
 
 class SITKFile:
-
     def __init__(self, path: str, file: sitk.Image):
         self.path = path
         self.file = file
@@ -24,7 +23,6 @@ class SITKFile:
         image.CopyInformation(self.file)
         sitk.WriteImage(image, file_name)
 
-
 class NIFTI(SITKFile):
     """
     SimpleITK Image from a file
@@ -35,6 +33,27 @@ class NIFTI(SITKFile):
         :param path: file to be read
         """
         super().__init__(path=path, file=sitk.ReadImage(path))
+
+
+
+class TempNIFTI(SITKFile):
+    """
+    SimpleITK Image from a file
+    """
+    def __init__(self, path):
+        """
+        Reads an image from a file
+        :param path: file to be read
+        """
+        super().__init__(path=path, file=sitk.GetImageFromArray([[[0]]]))
+        del self.volume
+
+
+    def __getattr__(self, item):
+        if item == "volume":
+            return sitk.GetArrayFromImage(sitk.ReadImage(self.path)).transpose((1, 2, 0))
+        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{item}'")
+
 
 
 class DICOM(SITKFile):

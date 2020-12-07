@@ -1,1 +1,1 @@
-from .sitk import NIFTI, DICOM
+from .sitk import NIFTI, DICOM, TempNIFTI
