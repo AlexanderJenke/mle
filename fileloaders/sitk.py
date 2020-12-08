@@ -1,7 +1,7 @@
 import SimpleITK as sitk
 from numpy import ndarray, transpose
 from torch import Tensor
-
+import os
 
 class SITKFile:
     def __init__(self, path: str, file: sitk.Image):
@@ -34,6 +34,9 @@ class NIFTI(SITKFile):
         """
         super().__init__(path=path, file=sitk.ReadImage(path))
 
+    @classmethod
+    def isValidPath(cls, path):
+        return os.path.isfile(path)
 
 
 class TempNIFTI(SITKFile):
@@ -54,19 +57,27 @@ class TempNIFTI(SITKFile):
             return sitk.GetArrayFromImage(sitk.ReadImage(self.path)).transpose((1, 2, 0))
         raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{item}'")
 
+    @classmethod
+    def isValidPath(cls, path):
+        return os.path.isfile(path)
+
 
 
 class DICOM(SITKFile):
     """
     SimpleITK Image from a Series
     """
-    def __init__(self, directory):
+    def __init__(self, path):
         """
         Reads an image from an image series
         :param directory: directory containing the image series
         """
         reader = sitk.ImageSeriesReader()
-        dicom_names = reader.GetGDCMSeriesFileNames(directory)
+        dicom_names = reader.GetGDCMSeriesFileNames(path)
         reader.SetFileNames(dicom_names)
         reader.MetaDataDictionaryArrayUpdateOn()
-        super().__init__(path=directory, file=reader.Execute())
+        super().__init__(path=path, file=reader.Execute())
+
+    @classmethod
+    def isValidPath(cls, path):
+        return os.path.isdir(path)

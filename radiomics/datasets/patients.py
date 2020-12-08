@@ -1,18 +1,31 @@
 from os import listdir
 from os.path import join, isfile
 
+from mle.fileloaders import NIFTI
 from torch.utils.data import Dataset
 
-from mle.fileloaders import NIFTI
+
+class _NoProgressBar:
+    def __init__(self, iter, **kwargs):
+        self.iter = iter
+
+    def __iter__(self):
+        return iter(self.iter)
 
 
 class Patients(Dataset):
-    def __init__(self, directory: str, file_name: str, fileloader=NIFTI):
+    def __init__(self, directory: str, file_name: str, fileloader=NIFTI, show_progress: bool = False):
         self.data = {}
 
-        for pat_id in listdir(directory):
+        if show_progress:
+            from tqdm import tqdm
+            prog_bar = tqdm
+        else:
+            prog_bar = _NoProgressBar
+
+        for pat_id in prog_bar(listdir(directory), desc=f"Loading {directory}"):
             file_path = join(directory, pat_id, file_name)
-            if isfile(file_path):
+            if fileloader.isValidPath(file_path):
                 self.data[pat_id] = fileloader(path=file_path)
             else:
                 print(f"{join(directory, pat_id, file_name)} does not exist!")
